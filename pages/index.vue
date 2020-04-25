@@ -76,6 +76,8 @@ export default {
   },
   methods: {
     async getArchive() {
+      this.archive = null
+      this.activeTitle = null
       if (this.date.length > 0) {
         const url = '/data/' + this.date + '/archive.json'
         try {
