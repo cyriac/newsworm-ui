@@ -2,94 +2,46 @@
   <div>
     <b-container fluid>
       <b-row>
-        <b-col cols="3">
-          <b-calendar v-model="date" locale="en-IN" />
+        <b-col cols="2">
+          <b-form-datepicker v-model="date" locale="en-IN" />
+          <b-list-group v-if="archive" class="py-3">
+            <b-list-group-item
+              v-for="(title, i) in Object.keys(archive)"
+              :key="i"
+              :active="activeTitle == title"
+              @click="activeTitle = title"
+              href="#"
+            >
+              {{ title }}
+            </b-list-group-item>
+          </b-list-group>
         </b-col>
-        <b-col>
+        <b-col v-if="archive" cols="10">
           <b-card-group columns>
             <b-card
-              title="Card Title"
-              img-src="https://picsum.photos/600/300/?image=25"
-              img-alt="Image"
+              v-for="(article, i) in articles"
+              :key="i"
+              :title="article.title"
+              :img-src="article.urlToImage"
+              :img-alt="article.title"
               img-top
               tag="article"
-              style="max-width: 18rem;"
+              style="max-width: 20rem;"
               class="mb-4"
             >
               <b-card-text>
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
+                <span class="small d-block my-2">
+                  {{ article.source.name }}
+                </span>
+                {{ article.description }}
               </b-card-text>
-            </b-card>
-            <b-card
-              title="Card Title"
-              img-src="https://picsum.photos/600/300/?image=25"
-              img-alt="Image"
-              img-top
-              tag="article"
-              style="max-width: 18rem;"
-              class="mb-4"
-            >
-              <b-card-text>
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </b-card-text>
-            </b-card>
-            <b-card
-              title="Card Title"
-              img-src="https://picsum.photos/600/300/?image=25"
-              img-alt="Image"
-              img-top
-              tag="article"
-              style="max-width: 18rem;"
-              class="mb-4"
-            >
-              <b-card-text>
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </b-card-text>
-            </b-card>
-            <b-card
-              title="Card Title"
-              img-src="https://picsum.photos/600/300/?image=25"
-              img-alt="Image"
-              img-top
-              tag="article"
-              style="max-width: 18rem;"
-              class="mb-4"
-            >
-              <b-card-text>
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </b-card-text>
-            </b-card>
-            <b-card
-              title="Card Title"
-              img-src="https://picsum.photos/600/300/?image=25"
-              img-alt="Image"
-              img-top
-              tag="article"
-              style="max-width: 18rem;"
-              class="mb-4"
-            >
-              <b-card-text>
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </b-card-text>
-            </b-card>
-            <b-card
-              title="Card Title"
-              img-src="https://picsum.photos/600/300/?image=25"
-              img-alt="Image"
-              img-top
-              tag="article"
-              style="max-width: 18rem;"
-              class="mb-4"
-            >
-              <b-card-text>
-                Some quick example text to build on the card title and make up
-                the bulk of the card's content.
-              </b-card-text>
+              <b-row>
+                <b-col>
+                  <b-link :href="article.url" class="card-link" target="_blank">
+                    Read more >>
+                  </b-link>
+                </b-col>
+              </b-row>
             </b-card>
           </b-card-group>
         </b-col>
@@ -102,7 +54,37 @@
 export default {
   data() {
     return {
+      archive: null,
+      activeTitle: null,
       date: ''
+    }
+  },
+  computed: {
+    articles() {
+      return this.archive[this.activeTitle]
+    }
+  },
+  watch: {
+    date: {
+      handler(af) {
+        this.getArchive()
+      }
+    }
+  },
+  mounted() {
+    this.getArchive()
+  },
+  methods: {
+    async getArchive() {
+      if (this.date.length > 0) {
+        const url = '/data/' + this.date + '/archive.json'
+        try {
+          this.archive = await this.$axios.$get(url)
+          this.activeTitle = Object.keys(this.archive)[0]
+        } catch (error) {
+          alert('No archive found for ' + this.date)
+        }
+      }
     }
   }
 }
